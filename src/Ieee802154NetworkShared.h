@@ -2,27 +2,26 @@
 
 #include <cstdint>
 
-#define MESSAGE_ID_HEADER 0x03
-
-#define MESSAGE_ID_DISCOVERY_REQUEST_V1 0x20
-#define MESSAGE_ID_DISCOVERY_RESPONSE_V1 0x21
-
-#define MESSAGE_ID_PENDING_TIMESTAMP_RESPONSE_V1 0x30
-#define MESSAGE_ID_PENDING_PAYLOAD_RESPONSE_V1 0x31
-
-#define MESSAGE_ID_PENDING_FIRMWARE_WIFI_CREDENTIALS_RESPONSE_V1 0x40
-#define MESSAGE_ID_PENDING_FIRMWARE_CHECKSUM_RESPONSE_V1 0x41
-#define MESSAGE_ID_PENDING_FIRMWARE_URL_RESPONSE_V1 0x42
-
 // Handle all structures like protobuf, e.g. cannot remove fields and new fields should be added last.
 namespace Ieee802154NetworkShared {
+
+constexpr uint8_t MESSAGE_ID_HEADER = 0x03;
+
+constexpr uint8_t MESSAGE_ID_DISCOVERY_REQUEST_V1 = 0x20;
+constexpr uint8_t MESSAGE_ID_DISCOVERY_RESPONSE_V1 = 0x21;
+
+constexpr uint8_t MESSAGE_ID_PENDING_TIMESTAMP_RESPONSE_V1 = 0x30;
+constexpr uint8_t MESSAGE_ID_PENDING_PAYLOAD_RESPONSE_V1 = 0x31;
+
+constexpr uint8_t MESSAGE_ID_PENDING_FIRMWARE_WIFI_CREDENTIALS_RESPONSE_V1 = 0x40;
+constexpr uint8_t MESSAGE_ID_PENDING_FIRMWARE_CHECKSUM_RESPONSE_V1 = 0x41;
+constexpr uint8_t MESSAGE_ID_PENDING_FIRMWARE_URL_RESPONSE_V1 = 0x42;
 
 /**
  * Regular payload message send by node to host.
  */
 struct __attribute__((packed)) MessageV1 {
   uint8_t id = MESSAGE_ID_HEADER;
-  uint16_t attempt = 0;
   uint8_t payload[]; // We know the size as we know the size from the decrypted outer message.
 };
 
