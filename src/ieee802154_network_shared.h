@@ -4,94 +4,94 @@
 
 #define MESSAGE_ID_HEADER 0x03
 
-#define MESSAGE_ID_DISCOVERY_REQUEST_V1 0xD0
-#define MESSAGE_ID_DISCOVERY_RESPONSE_V1 0xD1
+#define MESSAGE_ID_DISCOVERY_REQUEST_V1 0x20
+#define MESSAGE_ID_DISCOVERY_RESPONSE_V1 0x21
 
-#define MESSAGE_ID_CHALLENGE_REQUEST_V1 0xDA
-#define MESSAGE_ID_CHALLENGE_RESPONSE_V1 0xDB
-#define MESSAGE_ID_CHALLENGE_FIRMWARE_RESPONSE_V1 0xDC
-#define MESSAGE_ID_CHALLENGE_PAYLOAD_RESPONSE_V1 0xDD
+#define MESSAGE_ID_PENDING_TIMESTAMP_RESPONSE_V1 0x30
+#define MESSAGE_ID_PENDING_PAYLOAD_RESPONSE_V1 0x31
+
+#define MESSAGE_ID_PENDING_FIRMWARE_WIFI_CREDENTIALS_RESPONSE_V1 0x40
+#define MESSAGE_ID_PENDING_FIRMWARE_CHECKSUM_RESPONSE_V1 0x41
+#define MESSAGE_ID_PENDING_FIRMWARE_URL_RESPONSE_V1 0x42
 
 // Handle all structures like protobuf, e.g. cannot remove fields and new fields should be added last.
-
-#pragma pack(1)
+namespace Ieee802154NetworkShared {
 
 /**
- * Sent by host and nodes. This message is followed by the application message.
+ * Regular payload message send by node to host.
  */
-struct EspNowMessageHeaderV1 {
+struct __attribute__((packed)) MessageV1 {
   uint8_t id = MESSAGE_ID_HEADER;
-  uint16_t retries = 0;
-  uint32_t header_challenge; // Challenge from [EspNowChallengeResponseV1]
+  uint16_t attempt = 0;
+  uint8_t payload[]; // We know the size as we know the size from the decrypted outer message.
 };
 
 /**
  * Sent by nodes to perform host discovery.
  */
-struct EspNowDiscoveryRequestV1 {
+struct DiscoveryRequestV1 {
   uint8_t id = MESSAGE_ID_DISCOVERY_REQUEST_V1;
-  // The challenge that the host should send back/set in [EspNowDiscoveryResponseV1] reply.
-  uint32_t discovery_challenge;
 };
 
 /**
  * Sent by host to confirm host discovery.
  */
-struct EspNowDiscoveryResponseV1 {
+struct DiscoveryResponseV1 {
   uint8_t id = MESSAGE_ID_DISCOVERY_RESPONSE_V1;
-  uint32_t discovery_challenge; // Challenge from [EspNowDiscoveryRequestV1]
-  uint8_t channel;              // ESP-NOW/WiFi channel to use when sending messages. Must be a valid WiFi channel.
+  uint8_t channel; // 802.15.4 channel to use when sending messages. Must be a valid 802.15.4 channel between 11 and 26.
 };
 
 /**
- * Sent by nodes to request the challenge to include in the [EspNowMessageHeaderV1] message
- * for message verification (protect against reply attacks).
+ * Sent by host to node for time syncronization.
  */
-struct EspNowChallengeRequestV1 {
-  uint8_t id = MESSAGE_ID_CHALLENGE_REQUEST_V1;
-  uint32_t firmware_version;
-  // The challenge that the host should send back/set in [EspNowChallengeResponseV1] or
-  // [EspNowChallengeFirmwareResponseV1] reply.
-  uint32_t challenge_challenge;
+struct PendingTimestampResponseV1 {
+  uint8_t id = MESSAGE_ID_PENDING_TIMESTAMP_RESPONSE_V1;
+  uint64_t timestamp; // unix timestamp in seconds, UTC.
 };
 
 /**
- * Sent by host in reply to a [EspNowChallengeRequestV1].
- * The challenge can only be used once.
- */
-struct EspNowChallengeResponseV1 {
-  uint8_t id = MESSAGE_ID_CHALLENGE_RESPONSE_V1;
-  uint32_t challenge_challenge; // Challenge from [EspNowChallengeRequestV1].
-  uint32_t header_challenge;    // Should be set in [EspNowMessageHeaderV1].
-  uint64_t timestamp;           // unix timestamp in seconds, UTC.
-};
-
-/**
- * Sent by host in reply to a [EspNowChallengeRequestV1] when the device should update its firmware.
- */
-struct EspNowChallengeFirmwareResponseV1 {
-  uint8_t id = MESSAGE_ID_CHALLENGE_FIRMWARE_RESPONSE_V1;
-  uint32_t challenge_challenge; // Challenge from [EspNowChallengeRequestV1].
-  char wifi_ssid[32];           // WiFi SSID that node should connect to.
-  char wifi_password[32];       // WiFi password that the node should connect to.
-  char url[96];                 // url where to find firmware binary. Note the max file path.
-  char md5[32];                 // MD5 hash of firmware. Does not include trailing \0
-  uint32_t header_challenge;    // Should be set in [EspNowMessageHeaderV1].
-  uint64_t timestamp;           // unix timestamp in seconds, UTC.
-};
-
-/**
- * Sent by host in reply to a [EspNowChallengeRequestV1].
- * The challenge can only be used once.
+ * Sent by host when node has been informed about pending messages.
  * This message allows for the host to provide additional application specific payload.
  */
-struct EspNowChallengePayloadResponseV1 {
-  uint8_t id = MESSAGE_ID_CHALLENGE_PAYLOAD_RESPONSE_V1;
-  uint32_t challenge_challenge; // Challenge from [EspNowChallengeRequestV1].
-  uint32_t header_challenge;    // Should be set in [EspNowMessageHeaderV1].
-  uint64_t timestamp;           // unix timestamp in seconds, UTC.
-  uint8_t payload_size = 0;
-  // Following this is the payload itself. A maxium payload of 200 bytes is allowed.
+struct PendingPayloadResponseV1 {
+  uint8_t id = MESSAGE_ID_PENDING_PAYLOAD_RESPONSE_V1;
+  uint8_t payload[]; // We know the size as we know the size from the decrypted outer message. Max size 79 bytes.
 };
 
-#pragma pack(0)
+/**
+ * Sent by host when node has been informed about pending messages.
+ * This is part 1/3 of the firmware update process. We cannot fit everyting in one message.
+ * This can tecnically be omitted if the node already knows about the wifi credentials.
+ */
+struct PendingFirmwareWifiCredentialsResponseV1 {
+  uint8_t id = MESSAGE_ID_PENDING_FIRMWARE_WIFI_CREDENTIALS_RESPONSE_V1;
+  char wifi_ssid[32];     // WiFi SSID that node should connect to.
+  char wifi_password[32]; // WiFi password that the node should connect to.
+  uint32_t identifier;    // Set by host. All firmware update will have the same ID, so node should verify that they are
+                          // identical across pending firmware responses.
+};
+
+/**
+ * Sent by host when node has been informed about pending messages.
+ * This is part 2/3 of the firmware update process. We cannot fit everyting in one message.
+ */
+struct PendingFirmwareChecksumResponseV1 {
+  uint8_t id = MESSAGE_ID_PENDING_FIRMWARE_CHECKSUM_RESPONSE_V1;
+  char md5[32];        // MD5 hash of firmware. Does not include trailing \0
+  uint32_t identifier; // Set by host. All firmware update will have the same ID, so node should verify that they are
+  // identical across pending firmware responses.
+};
+
+/**
+ * Sent by host when node has been informed about pending messages.
+ * This is part 3/3 of the firmware update process. We cannot fit everyting in one message.
+ * After this message, firmware update will proceed, given that wifi credentials have been proided earlier.
+ */
+struct PendingFirmwareResponseV1 {
+  uint8_t id = MESSAGE_ID_PENDING_FIRMWARE_URL_RESPONSE_V1;
+  char url[75];        // url where to find firmware binary. Note the max file path.
+  uint32_t identifier; // Set by host. All firmware update will have the same ID, so node should verify that they are
+  // identical across pending firmware responses.
+};
+
+}; // namespace Ieee802154NetworkShared
