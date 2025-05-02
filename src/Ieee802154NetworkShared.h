@@ -86,7 +86,7 @@ struct __attribute__((packed)) PendingFirmwareChecksumResponseV1 {
  * This is part 3/3 of the firmware update process. We cannot fit everyting in one message.
  * After this message, firmware update will proceed, given that wifi credentials have been proided earlier.
  */
-struct __attribute__((packed)) PendingFirmwareResponseV1 {
+struct __attribute__((packed)) PendingFirmwareUrlResponseV1 {
   uint8_t id = MESSAGE_ID_PENDING_FIRMWARE_URL_RESPONSE_V1;
   char url[74];        // url where to find firmware binary. Note the max file path.
   uint32_t identifier; // Set by host. All firmware update will have the same ID, so node should verify that they are
