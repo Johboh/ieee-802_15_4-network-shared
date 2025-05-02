@@ -5,7 +5,7 @@
 // Handle all structures like protobuf, e.g. cannot remove fields and new fields should be added last.
 namespace Ieee802154NetworkShared {
 
-constexpr uint8_t MESSAGE_ID_HEADER = 0x03;
+constexpr uint8_t MESSAGE_ID_MESSAGE = 0x03;
 
 constexpr uint8_t MESSAGE_ID_DISCOVERY_REQUEST_V1 = 0x20;
 constexpr uint8_t MESSAGE_ID_DISCOVERY_RESPONSE_V1 = 0x21;
@@ -21,8 +21,8 @@ constexpr uint8_t MESSAGE_ID_PENDING_FIRMWARE_URL_RESPONSE_V1 = 0x42;
  * Regular payload message send by node to host.
  */
 struct __attribute__((packed)) MessageV1 {
-  uint8_t id = MESSAGE_ID_HEADER;
-  uint8_t payload[]; // We know the size as we know the size from the decrypted outer message.
+  uint8_t id = MESSAGE_ID_MESSAGE;
+  uint8_t payload[]; // We know the size as we know the size from the decrypted outer message. Maxium size is 78 bytes.
 };
 
 /**
@@ -54,7 +54,7 @@ struct __attribute__((packed)) PendingTimestampResponseV1 {
  */
 struct __attribute__((packed)) PendingPayloadResponseV1 {
   uint8_t id = MESSAGE_ID_PENDING_PAYLOAD_RESPONSE_V1;
-  uint8_t payload[]; // We know the size as we know the size from the decrypted outer message. Max size 79 bytes.
+  uint8_t payload[]; // We know the size as we know the size from the decrypted outer message. Max size 78 bytes.
 };
 
 /**
@@ -88,7 +88,7 @@ struct __attribute__((packed)) PendingFirmwareChecksumResponseV1 {
  */
 struct __attribute__((packed)) PendingFirmwareResponseV1 {
   uint8_t id = MESSAGE_ID_PENDING_FIRMWARE_URL_RESPONSE_V1;
-  char url[75];        // url where to find firmware binary. Note the max file path.
+  char url[74];        // url where to find firmware binary. Note the max file path.
   uint32_t identifier; // Set by host. All firmware update will have the same ID, so node should verify that they are
   // identical across pending firmware responses.
 };
