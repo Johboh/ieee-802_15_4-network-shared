@@ -22,7 +22,8 @@ constexpr uint8_t MESSAGE_ID_PENDING_FIRMWARE_URL_RESPONSE_V1 = 0x42;
  */
 struct __attribute__((packed)) MessageV1 {
   uint8_t id = MESSAGE_ID_MESSAGE;
-  uint8_t payload[]; // We know the size as we know the size from the decrypted outer message. Maxium size is 78 bytes.
+  uint32_t firmware_version;
+  uint8_t payload[]; // We know the size as we know the size from the decrypted outer message. Maxium size is 74 bytes.
 };
 
 /**
