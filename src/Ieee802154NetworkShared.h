@@ -5,6 +5,11 @@
 // Handle all structures like protobuf, e.g. cannot remove fields and new fields should be added last.
 namespace Ieee802154NetworkShared {
 
+// This represents the maximum size of a message here, including the ID.
+// Can be used to deduce available payload size of payloads.
+// auto payload_size = MAX_MESSAGE_SIZE - sizeof(MessageV1);
+constexpr uint8_t MAX_MESSAGE_SIZE = 79;
+
 constexpr uint8_t MESSAGE_ID_MESSAGE = 0x03;
 
 constexpr uint8_t MESSAGE_ID_DISCOVERY_REQUEST_V1 = 0x20;
@@ -131,7 +136,7 @@ struct __attribute__((packed)) PendingFirmwareDataResponseV1 {
   uint8_t id = MESSAGE_ID_PENDING_FIRMWARE_DATA_RESPONSE_V1;
   uint32_t identifier; // Set by host. All firmware update will have the same ID, so node should verify that they are
                        // identical across pending firmware responses.
-  uint8_t payload[];   // We know the size as we know the size from the decrypted outer message. Max size 73 bytes.
+  uint8_t payload[];   // We know the size as we know the size from the decrypted outer message. Max size 74 bytes.
 };
 
 /**
