@@ -22,11 +22,6 @@ constexpr uint8_t MESSAGE_ID_PENDING_PAYLOAD_RESPONSE_V1 = 0x31;
 constexpr uint8_t MESSAGE_ID_PENDING_FIRMWARE_WIFI_CREDENTIALS_RESPONSE_V1 = 0x40;
 constexpr uint8_t MESSAGE_ID_PENDING_FIRMWARE_CHECKSUM_RESPONSE_V1 = 0x41;
 constexpr uint8_t MESSAGE_ID_PENDING_FIRMWARE_URL_RESPONSE_V1 = 0x42;
-// Firmware update when using 802.15.4.
-constexpr uint8_t MESSAGE_ID_PENDING_FIRMWARE_RESPONSE_V1 = 0x50;
-constexpr uint8_t MESSAGE_ID_PENDING_FIRMWARE_BEGIN_RESPONSE_V1 = 0x51;
-constexpr uint8_t MESSAGE_ID_PENDING_FIRMWARE_DATA_RESPONSE_V1 = 0x52;
-constexpr uint8_t MESSAGE_ID_PENDING_FIRMWARE_END_RESPONSE_V1 = 0x53;
 
 /**
  * Regular payload message send by node to host.
@@ -103,52 +98,6 @@ struct __attribute__((packed)) PendingFirmwareUrlResponseV1 {
   char url[74];        // url where to find firmware binary. Note the max file path.
   uint32_t identifier; // Set by host. All firmware update will have the same ID, so node should verify that they are
   // identical across pending firmware responses.
-};
-
-/**
- * Sent by host when node has been informed about pending messages.
- * This is for the firmware update process when using 802.15.4. Part 1 to indicate that there will be more, potentially
- * slower messages.
- */
-struct __attribute__((packed)) PendingFirmwareResponseV1 {
-  uint8_t id = MESSAGE_ID_PENDING_FIRMWARE_RESPONSE_V1;
-  uint32_t identifier; // Set by host. All firmware update will have the same ID, so node should verify that they are
-  // identical across pending firmware responses.
-};
-
-/**
- * Sent by host when node has been informed about pending messages.
- * This is for the firmware update process when using 802.15.4. Part 2 to indicate a begin/start of OTA.
- */
-struct __attribute__((packed)) PendingFirmwareBeginResponseV1 {
-  uint8_t id = MESSAGE_ID_PENDING_FIRMWARE_BEGIN_RESPONSE_V1;
-  uint32_t identifier; // Set by host. All firmware update will have the same ID, so node should verify that they are
-  // identical across pending firmware responses.
-  uint64_t size; // Size of firmware, in bytes.
-};
-
-/**
- * Sent by host when node has been informed about pending messages.
- * This is for the firmware update process when using 802.15.4. Part 3, repeating. Host will continue to send acked
- * messages until all data has been sent.
- */
-struct __attribute__((packed)) PendingFirmwareDataResponseV1 {
-  uint8_t id = MESSAGE_ID_PENDING_FIRMWARE_DATA_RESPONSE_V1;
-  uint32_t identifier; // Set by host. All firmware update will have the same ID, so node should verify that they are
-                       // identical across pending firmware responses.
-  uint8_t payload[];   // We know the size as we know the size from the decrypted outer message. Max size 74 bytes.
-};
-
-/**
- * Sent by host when node has been informed about pending messages.
- * Host must send checksum first.
- * This is for the firmware update process when using 802.15.4. Part 4 to indicate done/end/complete.
- */
-struct __attribute__((packed)) PendingFirmwareEndResponseV1 {
-  uint8_t id = MESSAGE_ID_PENDING_FIRMWARE_END_RESPONSE_V1;
-  uint32_t identifier; // Set by host. All firmware update will have the same ID, so node should verify that they are
-                       // identical across pending firmware responses.
-  char md5[32];        // MD5 hash of firmware. Does not include trailing \0
 };
 
 }; // namespace Ieee802154NetworkShared
