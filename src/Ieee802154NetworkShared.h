@@ -14,6 +14,8 @@ constexpr uint8_t MESSAGE_ID_MESSAGE = 0x03;
 
 constexpr uint8_t MESSAGE_ID_DISCOVERY_REQUEST_V1 = 0x20;
 constexpr uint8_t MESSAGE_ID_DISCOVERY_RESPONSE_V1 = 0x21;
+// Can be sent at any point in time to tell host to forget its host and redo discovery.
+constexpr uint8_t MESSAGE_ID_FORGET_HOST_RESPONSE_V1 = 0x22;
 
 constexpr uint8_t MESSAGE_ID_PENDING_TIMESTAMP_RESPONSE_V1 = 0x30;
 constexpr uint8_t MESSAGE_ID_PENDING_PAYLOAD_RESPONSE_V1 = 0x31;
@@ -45,6 +47,13 @@ struct __attribute__((packed)) DiscoveryRequestV1 {
 struct __attribute__((packed)) DiscoveryResponseV1 {
   uint8_t id = MESSAGE_ID_DISCOVERY_RESPONSE_V1;
   uint8_t channel; // 802.15.4 channel to use when sending messages. Must be a valid 802.15.4 channel between 11 and 26.
+};
+
+/**
+ * Sent by host to force nodes to perform host discovery.
+ */
+struct __attribute__((packed)) ForgetHostResponseV1 {
+  uint8_t id = MESSAGE_ID_FORGET_HOST_RESPONSE_V1;
 };
 
 /**
