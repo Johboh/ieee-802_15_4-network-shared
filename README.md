@@ -6,3 +6,6 @@
 [![Clang-format](https://github.com/Johboh/ieee-802_15_4-network-shared/actions/workflows/clang-format.yaml/badge.svg)](https://github.com/Johboh/ieee-802_15_4-network-shared)
 
 Shared library for the Ieee 802.15.4 Network between [Host](https://github.com/Johboh/ieee-802_15_4-network-host) and [Node](https://github.com/Johboh/ieee-802_15_4-network-node). See respectively for more details.
+
+### License
+Licensed under the GNU General Public License v3.0 or later
